@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="wave"></div>
+     <div class="wave"></div>
+     <div class="wave"></div>
+    <h1>Quiz Game</h1>
+    <div class="container mt-5">
+        <div class="card text-center">
+            <div class="card-header">
+                <span id="questionNumber" class="badge badge-secondary">1/<%= quizzes.length %></span>
+            </div>
+            <div class="card-body">
+                <h5 id="questionTitle" class="card-title"></h5>
+                <form id="quizForm" action="http://localhost:3000/submit" method="post">
+                    <% quizzes.forEach((quiz, index) => { %>
+                        <div class="question-container" id="question-<%= index %>" style="display: none;">
+                            <p class="lead"><%= quiz.question %></p>
+                            <% quiz.options.forEach(option => { %>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="<%= 'question' + index + option %>" name="<%= quiz._id %>" value="<%= option %>" class="custom-control-input" onclick="checkAnswer('<%= quiz.answer %>', this)">
+                                    <label class="custom-control-label" for="<%= 'question' + index + option %>"><%= option %></label>
+                                </div>
+                            <% }) %>
+                        </div>
+                    <% }) %>
+                    <button type="button" class="btn btn-secondary" id="prevBtn" onclick="changeQuestion(-1)" disabled>Previous</button>
+                    <button type="button" class="btn btn-secondary" id="nextBtn" onclick="changeQuestion(1)" style="display: none;">Next</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div>
+        <button class="btn btn-primary" style="margin-left: 39rem !important; margin-top: 2rem !important;"><a href="http://localhost:3000/" style="text-decoration: none !important; color: white;">Restart</a></button>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        const questions = document.querySelectorAll('.question-container');
+        let currentQuestionIndex = 0;
+
+        function showQuestion(index) {
+            questions.forEach((question, i) => {
+                question.style.display = i === index ? 'block' : 'none';
+            });
+            document.getElementById('questionNumber').textContent = `${index + 1}/${questions.length}`;
+            document.getElementById('prevBtn').disabled = index === 0;
+            document.getElementById('nextBtn').style.display = index === questions.length - 1 ? 'none' : 'inline-block';
+            document.getElementById('submitBtn').style.display = index === questions.length - 1 ? 'inline-block' : 'none';
+        }
+
+        function changeQuestion(direction) {
+            currentQuestionIndex += direction;
+            showQuestion(currentQuestionIndex);
+        }
+
+        function checkAnswer(correctAnswer, selectedOption) {
+            const questionContainer = selectedOption.closest('.question-container');
+            const options = questionContainer.querySelectorAll('.custom-control-input');
+            options.forEach(option => {
+                const label = questionContainer.querySelector(`label[for="${option.id}"]`);
+                if (option.value === correctAnswer) {
+                    label.style.backgroundColor = 'green';
+                } else if (option.checked) {
+                    label.style.backgroundColor = 'red';
+                }
+                option.disabled = true;
+            });
+            document.getElementById('nextBtn').style.display = 'inline-block';
+        }
+
+        // Initial display of the first question
+        showQuestion(currentQuestionIndex);
+    </script>
+</body>
+</html>
